@@ -20,11 +20,19 @@ def drop():
 
 def fixtures():
     db.session()
-    db.session.add(Repo('6.0.devel', '/mnt/repo/6.0.devel', '6.0.devel'))
-    db.session.add(Repo('6.0.release', '/mnt/repo/6.0.release', '6.0.release'))
-    db.session.add(Repo('6.1.devel', '/mnt/repo/6.1.devel', '6.1.devel'))
-    db.session.add(Repo('6.1.release', '/mnt/repo/6.1.release', '6.1.release'))
-    db.session.commit()
+    repo_names = ['6.0.devel', '6.1.devel', '6.0.release', '6.1.release']
+    for repo_name in repo_names:
+        repo = Repo(repo_name, '/mnt/repo/%s' % repo_name, repo_name)
+        db.session.add(repo)
+        db.session.commit()
+
+        metadata = Metadata(repo_name, '/mnt/repo/metadata/%s' % repo_name, repo.id)
+        db.session.add(metadata)
+        db.session.commit()
+
+        snapshot = Snapshot(name=repo_name, type='current', filelist='', metadata_id=metadata.id, repo_id=repo.id)
+        db.session.add(snapshot)
+        db.session.commit()
 
 if __name__ == "__main__":
     manager.run()

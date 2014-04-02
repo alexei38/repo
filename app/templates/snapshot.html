@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<a data-toggle="modal" href="#SnapshotModal" class="btn btn-success">Add Snapshot</a>
+<table class="table table-striped">
+  <thead>
+    <th>Имя</th>
+    <th>Тип</th>
+    <th>Репозиторий</th>
+    <th>Метаданные</th>
+  </thead>
+  <tbody>
+    {% for snapshot in snapshots %}
+    <tr>
+      <td>{{snapshot.name}}</td>
+      <td>{{snapshot.type}}</td>
+      <td>{{snapshot.repo.name}}</td>
+      <td>{{snapshot.metadata.name}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div style="display: none;" id="SnapshotModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="SnapshotModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="SnapshotModalLabel">Add Snapshot</h3>
+  </div>
+  <div class="modal-body">
+    {% if form %}
+    <form accept-charset="UTF-8" class="form-horizontal" method="post" name="add_snapshot">
+      {{form.hidden_tag()}}
+      <div class="control-group">
+        <label class="control-label" for="name">Имя</label>
+        <div class="controls">
+          {{form.name()}}
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="path">Тип</label>
+        <div class="controls">
+          {{form.type()}}
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="comment">Репозиторий</label>
+        <div class="controls">
+          {{form.repo_id()}}
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="comment">Метаданные</label>
+        <div class="controls">
+          {{form.metadata_id()}}
+        </div>
+      </div>
+
+      <div class="modal-footer">
+          <button class="btn btn-danger" data-dismiss="modal">Close</button>
+          <button class="btn btn-primary">Submit</button>
+      </div>
+
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

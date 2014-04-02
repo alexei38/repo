@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-<a data-toggle="modal" href="#RepoModal" class="btn btn-success">Add Repo</a>
+<a data-toggle="modal" href="#MetaModal" class="btn btn-success">Add Metadata</a>
 <table class="table table-striped">
   <thead>
     <th>Имя</th>
     <th>Путь</th>
-    <th>Комментарий</th>
+    <th>Репозиторий</th>
   </thead>
   <tbody>
-    {% for repo in repos %}
+    {% for metadata in metadatas %}
     <tr>
-      <td>{{repo.name}}</td>
-      <td>{{repo.path}}</td>
-      <td>{{repo.comment}}</td>
+      <td>{{metadata.name}}</td>
+      <td>{{metadata.path}}</td>
+      <td>{{metadata.repo.name}}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
-<div style="display: none;" id="RepoModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="RepoModalLabel" aria-hidden="true">
+<div style="display: none;" id="MetaModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="MetaModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="RepoModalLabel">Add repo</h3>
+    <h3 id="MetaModalLabel">Add Metadata</h3>
   </div>
   <div class="modal-body">
     {% if form %}
@@ -42,9 +42,9 @@
       </div>
 
       <div class="control-group">
-        <label class="control-label" for="comment">Коментарий</label>
+        <label class="control-label" for="comment">Репозиторий</label>
         <div class="controls">
-          {{form.comment()}}
+          {{form.repo_id()}}
         </div>
       </div>
 

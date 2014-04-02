@@ -13,13 +13,8 @@ app.config.from_object('app.config.DevelopmentConfig')
 # ProductionConfig
 #app.config.from_object('repo.config.ProductionConfig')
 
-# Connect to database with sqlalchemy.
+
 from flask.ext.sqlalchemy import SQLAlchemy
 db = SQLAlchemy(app)
-
 from app import models, views
 
-# Business Logic
-# http://flask.pocoo.org/docs/patterns/packages/
-# http://flask.pocoo.org/docs/blueprints/
-#app.register_blueprint(views.frontend)

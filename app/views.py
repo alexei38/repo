@@ -2,8 +2,8 @@
 
 from app import app, db
 from flask.views import MethodView
-from flask import Blueprint, request, render_template, url_for, redirect, flash
-from forms import RepoForm
+from flask import request, render_template, url_for, redirect, flash
+from forms import RepoForm, SnapshotForm, MetadataForm
 from models import *
 
 def flash_errors(form):
@@ -12,7 +12,6 @@ def flash_errors(form):
         for error in errors:
             flash(unicode(error), 'error')
 
-#frontend = Blueprint('frontend', __name__)
 # 404 page not found "route"
 @app.errorhandler(404)
 def not_found(error):
@@ -32,7 +31,6 @@ def index():
     return render_template('index.html')
 
 class RepoView(MethodView):
-
     def get(self):
     	repos = Repo.query.all()
         form = RepoForm()
@@ -51,4 +49,34 @@ class RepoView(MethodView):
             flash_errors(form)
         return render_template('repo.html', form=form, repos=repos)
 
+class SnapshotView(MethodView):
+    def get(self):
+        snapshots = Snapshot.query.all()
+        form = SnapshotForm()
+        return render_template('snapshot.html', form=form, snapshots=snapshots)
+
+    def post(self):
+        snapshots = Snapshot.query.all()
+        form = SnapshotForm()
+        if form.validate_on_submit():
+            #db.session()
+            #db.session.add(Repo(request.form['name'], request.form['path'], request.form['comment']))
+            #db.session.commit()
+            flash(u'Выполненно успешно!', 'success')
+            return redirect(url_for('snapshot'))
+        return render_template('snapshot.html', form=form, snapshots=snapshots)
+
+class MetadataView(MethodView):
+    def get(self):
+        metadatas = Metadata.query.all()
+        form = MetadataForm()
+        return render_template('metadata.html', form=form, metadatas=metadatas)
+
+    def post(self):
+        metadatas = Metadata.query.all()
+        form = MetadataForm()
+        return render_template('metadata.html', form=form, metadatas=metadatas)
+
 app.add_url_rule('/repo/', view_func=RepoView.as_view('repo'))
+app.add_url_rule('/snapshot/', view_func=SnapshotView.as_view('snapshot'))
+app.add_url_rule('/metadata/', view_func=MetadataView.as_view('metadata'))
