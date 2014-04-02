@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<a data-toggle="modal" href="#RepoModal" class="btn btn-success">Add Repo</a>
+<table class="table table-striped">
+  <thead>
+    <th>Имя</th>
+    <th>Путь</th>
+    <th>Комментарий</th>
+  </thead>
+  <tbody>
+    {% for repo in repos %}
+    <tr>
+      <td>{{repo.name}}</td>
+      <td>{{repo.path}}</td>
+      <td>{{repo.comment}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div style="display: none;" id="RepoModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="HostModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="HostModalLabel">Add repo</h3>
+  </div>
+  <div class="modal-body">
+    <form accept-charset="UTF-8" class="form-horizontal" method="post" name="add_repo">
+      {{form.hidden_tag()}}
+      <div class="control-group">
+        <label class="control-label" for="name">Имя</label>
+        <div class="controls">
+          {{form.name()}}
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="path">Путь</label>
+        <div class="controls">
+          {{form.path()}}
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="comment">Коментарий</label>
+        <div class="controls">
+          {{form.comment()}}
+        </div>
+      </div>
+
+      <div class="modal-footer">
+          <button class="btn btn-danger" data-dismiss="modal">Close</button>
+          <button class="btn btn-primary">Submit</button>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
