@@ -3,7 +3,7 @@
 from app import app, db
 from flask.views import MethodView
 from flask import request, render_template, url_for, redirect, flash
-from forms import RepoForm, SnapshotForm, MetadataForm
+from forms import RepoForm, SnapshotForm
 from models import *
 
 def flash_errors(form):
@@ -66,17 +66,5 @@ class SnapshotView(MethodView):
             return redirect(url_for('snapshot'))
         return render_template('snapshot.html', form=form, snapshots=snapshots)
 
-class MetadataView(MethodView):
-    def get(self):
-        metadatas = Metadata.query.all()
-        form = MetadataForm()
-        return render_template('metadata.html', form=form, metadatas=metadatas)
-
-    def post(self):
-        metadatas = Metadata.query.all()
-        form = MetadataForm()
-        return render_template('metadata.html', form=form, metadatas=metadatas)
-
 app.add_url_rule('/repo/', view_func=RepoView.as_view('repo'))
 app.add_url_rule('/snapshot/', view_func=SnapshotView.as_view('snapshot'))
-app.add_url_rule('/metadata/', view_func=MetadataView.as_view('metadata'))

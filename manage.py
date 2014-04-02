@@ -26,11 +26,7 @@ def fixtures():
         db.session.add(repo)
         db.session.commit()
 
-        metadata = Metadata(repo_name, '/mnt/repo/metadata/%s' % repo_name, repo.id)
-        db.session.add(metadata)
-        db.session.commit()
-
-        snapshot = Snapshot(name=repo_name, type='current', filelist='', metadata_id=metadata.id, repo_id=repo.id)
+        snapshot = Snapshot(name=repo_name, type='current', path='/mnt/repo/meta/%s' % repo_name, filelist='', repo_id=repo.id)
         db.session.add(snapshot)
         db.session.commit()
 

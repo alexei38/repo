@@ -23,10 +23,5 @@ class RepoForm(Form):
 class SnapshotForm(Form):
     name = TextField('name', [validators.Required(), Unique(Snapshot, Snapshot.name)])
     type = SelectField('type', choices=[('current', 'current'), ('test', 'test')])
-    metadata_id = SelectField('metadata_id', choices=[(x.id, "%s - %s" % (x.name, x.path)) for x in Metadata.query.all()])
-    repo_id = SelectField('repo_id', choices=[(x.id, "%s - %s" % (x.name, x.path)) for x in Repo.query.all()])
-
-class MetadataForm(Form):
-    name = TextField('name', [validators.Required(), Unique(Snapshot, Snapshot.name)])
     path = TextField('path', [validators.Required(), Unique(Repo, Repo.path)])
     repo_id = SelectField('repo_id', choices=[(x.id, "%s - %s" % (x.name, x.path)) for x in Repo.query.all()])

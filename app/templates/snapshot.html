@@ -5,7 +5,7 @@
   <thead>
     <th>Имя</th>
     <th>Тип</th>
-    <th>Репозиторий</th>
+    <th>Путь</th>
     <th>Метаданные</th>
   </thead>
   <tbody>
@@ -13,8 +13,8 @@
     <tr>
       <td>{{snapshot.name}}</td>
       <td>{{snapshot.type}}</td>
+      <td>{{snapshot.path}}</td>
       <td>{{snapshot.repo.name}}</td>
-      <td>{{snapshot.metadata.name}}</td>
     </tr>
     {% endfor %}
   </tbody>
@@ -44,16 +44,16 @@
       </div>
 
       <div class="control-group">
-        <label class="control-label" for="comment">Репозиторий</label>
+        <label class="control-label" for="path">Путь</label>
         <div class="controls">
-          {{form.repo_id()}}
+          {{form.path()}}
         </div>
       </div>
 
       <div class="control-group">
-        <label class="control-label" for="comment">Метаданные</label>
+        <label class="control-label" for="comment">Репозиторий</label>
         <div class="controls">
-          {{form.metadata_id()}}
+          {{form.repo_id()}}
         </div>
       </div>
 
