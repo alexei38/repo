@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<table class="table table-striped">
+  <thead>
+    <th>Путь</th>
+    <th>Размер</th>
+  </thead>
+  <tbody>
+    {% for file, path, type, size in items %}
+    <tr>
+      <td><a href="{{ path }}">{{ file }}</a></td>
+      <td>{{ size }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

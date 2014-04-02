@@ -24,3 +24,4 @@ class DevelopmentConfig(Config):
     DEBUG = True
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(FLASK_APP_DIR, 'development.db')
+    BASE_PATH = os.path.dirname(FLASK_APP_DIR)

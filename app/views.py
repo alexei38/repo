@@ -2,15 +2,23 @@
 
 from app import app, db
 from flask.views import MethodView
-from flask import request, render_template, url_for, redirect, flash
+from flask import request, render_template, url_for, redirect, flash, send_from_directory
 from forms import RepoForm, SnapshotForm
 from models import *
+from operator import itemgetter
+import os
 
 def flash_errors(form):
     """Flashes form errors"""
     for field, errors in form.errors.items():
         for error in errors:
             flash(unicode(error), 'error')
+
+def sizeof_fmt(num):
+    for x in ['B','KB','MB','GB','TB']:
+        if num < 1024.0:
+            return "%3.1f %s" % (num, x)
+        num /= 1024.0
 
 # 404 page not found "route"
 @app.errorhandler(404)
@@ -25,10 +33,29 @@ def server_error(error):
     db.session.rollback()
     return render_template('500.html', title=title), 500
 
-# general routes    
+# Отдаем всем файлы как раньше
 @app.route('/')
-def index():
-    return render_template('index.html')
+@app.route('/<path:path>')
+def file_list(path=''):
+    base_path = app.config['BASE_PATH']
+    full_path = os.path.join(base_path, path)
+    print base_path
+    if not os.path.isdir(full_path):
+        return send_from_directory(os.path.dirname(full_path), os.path.basename(full_path), as_attachment=True)
+    items = []
+
+    if path not in ['', '/']:
+        parent_path = os.path.normpath(os.path.join('/', path, '..'))
+        if parent_path != '.':
+            items.append(('..', parent_path, True, 0))
+    for f in os.listdir(full_path):
+        real_path = os.path.join(full_path, f)
+        link_path = os.path.join('/', path, f)
+        items.append((f, link_path, os.path.isdir(real_path), sizeof_fmt(os.path.getsize(real_path))))
+        items.sort(key=itemgetter(0))
+        items.sort(key=itemgetter(2), reverse=True)
+
+    return render_template('filelist.html', items=items)
 
 class RepoView(MethodView):
     def get(self):

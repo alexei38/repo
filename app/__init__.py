@@ -17,4 +17,8 @@ app.config.from_object('app.config.DevelopmentConfig')
 from flask.ext.sqlalchemy import SQLAlchemy
 db = SQLAlchemy(app)
 from app import models
-from app import views
+from sqlalchemy.exc import OperationalError
+try:
+    from app import views
+except OperationalError:
+    pass
