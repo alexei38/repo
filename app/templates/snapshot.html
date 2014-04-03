@@ -6,7 +6,8 @@
     <th>Имя</th>
     <th>Тип</th>
     <th>Путь</th>
-    <th>Метаданные</th>
+    <th>Репозиторий</th>
+    <th>Время создания</th>
   </thead>
   <tbody>
     {% for snapshot in snapshots %}
@@ -15,6 +16,7 @@
       <td>{{snapshot.type}}</td>
       <td>{{snapshot.path}}</td>
       <td>{{snapshot.repo.name}}</td>
+      <td nowrap="nowrap">{{ snapshot.created_on | strftime }}</td>
     </tr>
     {% endfor %}
   </tbody>
@@ -29,24 +31,11 @@
     {% if form %}
     <form accept-charset="UTF-8" class="form-horizontal" method="post" name="add_snapshot">
       {{form.hidden_tag()}}
-      <div class="control-group">
-        <label class="control-label" for="name">Имя</label>
-        <div class="controls">
-          {{form.name()}}
-        </div>
-      </div>
 
       <div class="control-group">
         <label class="control-label" for="path">Тип</label>
         <div class="controls">
           {{form.type()}}
-        </div>
-      </div>
-
-      <div class="control-group">
-        <label class="control-label" for="path">Путь</label>
-        <div class="controls">
-          {{form.path()}}
         </div>
       </div>
 

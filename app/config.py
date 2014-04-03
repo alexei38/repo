@@ -6,7 +6,9 @@ FLASK_APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Config(object):
     CSRF_ENABLED = True
-    SECRET_KEY = 'you-will-never-guess'
+    SECRET_KEY = '\x07Y\x07\xcb\xc7\x1dy\x94\xbd\xd1\x85jD1\x89w(>m,w\xcd`\xa0'
+    BASE_PATH = '/mnt/repo'
+    META_PATH = '/mnt/repo/meta'
     pass
     
 class ProductionConfig(Config):
@@ -24,4 +26,3 @@ class DevelopmentConfig(Config):
     DEBUG = True
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(FLASK_APP_DIR, 'development.db')
-    BASE_PATH = os.path.dirname(FLASK_APP_DIR)

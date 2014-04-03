@@ -2,8 +2,9 @@
 
 from flask.ext.wtf import Form
 from wtforms import TextField, BooleanField, TextAreaField, SelectField, validators, ValidationError
-from app.models import *
-from app import db
+from wtforms.ext.sqlalchemy.fields import QuerySelectField
+from app.models import Repo, Snapshot
+from app import app, db
 
 class Unique(object):
     def __init__(self, model, field):
@@ -21,7 +22,7 @@ class RepoForm(Form):
     comment = TextAreaField('comment')
 
 class SnapshotForm(Form):
-    name = TextField('name', [validators.Required(), Unique(Snapshot, Snapshot.name)])
-    type = SelectField('type', choices=[('current', 'current'), ('test', 'test')])
-    path = TextField('path', [validators.Required(), Unique(Repo, Repo.path)])
-    repo_id = SelectField('repo_id', choices=[(x.id, "%s - %s" % (x.name, x.path)) for x in Repo.query.all()])
+    type = SelectField('type', choices=[('test', 'test'), ('master', 'master')])
+    repo_id = QuerySelectField(query_factory=Repo.query.all,
+                            get_pk=lambda a: a.id,
+                            get_label=lambda a: "%s - %s" % (a.name, a.path))
