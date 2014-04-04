@@ -5,16 +5,14 @@
   <thead>
     <th>Имя</th>
     <th>Тип</th>
-    <th>Путь</th>
     <th>Репозиторий</th>
     <th>Время создания</th>
   </thead>
   <tbody>
     {% for snapshot in snapshots %}
     <tr>
-      <td>{{snapshot.name}}</td>
+      <td><a href="/snapshot/{{snapshot.name}}" onClick="return false;">{{snapshot.name}}</a></td>
       <td>{{snapshot.type}}</td>
-      <td>{{snapshot.path}}</td>
       <td>{{snapshot.repo.name}}</td>
       <td nowrap="nowrap">{{ snapshot.created_on | strftime }}</td>
     </tr>

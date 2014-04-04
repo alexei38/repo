@@ -23,8 +23,8 @@ def fixtures():
     db.session()
     repo_names = ['6.0.devel', '6.1.devel', '6.0.release', '6.1.release']
     for repo_name in repo_names:
-        repo_path = os.path.join('/mnt/repo/', repo_name)
-        repo = Repo(repo_name, os.path.join('/mnt/repo/', repo_name), repo_name)
+        repo_path = os.path.join(app.config['BASE_PATH'], repo_name)
+        repo = Repo(repo_name, os.path.join(app.config['BASE_PATH'], repo_name), repo_name)
         db.session.add(repo)
         db.session.commit()
         snapshot = Snapshot(name=repo_name, type='master', path=repo_path, repo_id=repo.id)
@@ -33,9 +33,13 @@ def fixtures():
         generate_matadata(repo_path, repo_path)
 
 def generate_matadata(repo_path, meta_path):
+    repo_path = str(repo_path)
+    meta_path = str(meta_path)
     sys.path.append('/usr/share/createrepo')
     if not os.path.exists(meta_path):
         os.mkdir(meta_path)
+    if not os.path.exists(repo_path):
+        os.mkdir(repo_path)
     import genpkgmetadata
     genpkgmetadata.main(['--output', meta_path, '-q', repo_path])
 

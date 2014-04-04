@@ -3,10 +3,11 @@
 from app import app, db
 from flask.views import MethodView
 from flask import request, render_template, url_for, redirect, flash, send_from_directory
-from forms import RepoForm, SnapshotForm
+from werkzeug.utils import secure_filename
+from forms import RepoForm, SnapshotForm, UploadForm
 from models import Repo, Snapshot
 from operator import itemgetter
-import os, sys
+import os, sys, time, json
 from datetime import datetime
 
 @app.template_filter('strftime')
@@ -61,6 +62,56 @@ def get_snapshot(snapshot,path=''):
     folder = os.path.basename(full_path)
     return send_from_directory(file, folder, as_attachment=True)
 
+class UploadView(MethodView):
+    def get(self):
+        form = UploadForm()
+        return render_template('upload.html', form=form)
+
+    def post(self):
+        def upload_files(request):
+            files = request.files.getlist("file")
+            repo = Repo.query.filter(Repo.name == request.form['repo_name']).first()
+            folder = os.path.join(app.config['BASE_PATH'], repo.path, request.form['arch'])
+            if not os.path.exists(folder):
+                os.mkdir(folder)
+            for file in files:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(folder, filename))
+            if 'snapshot' in request.form:
+                import uuid
+                name = str(uuid.uuid4())
+                path = os.path.join(app.config['META_PATH'], name)
+                db.session()
+                snapshot = Snapshot( name=name,
+                                     type='test',
+                                     path=path,
+                                     repo_id=repo.id
+                                   )
+                db.session.add(snapshot)
+                db.session.commit()
+                generate_matadata(repo.path, path)
+                ret = "http://repo.cc.naumen.ru/snapshot/%s" % snapshot.name
+            else:
+                ret = "http://repo.cc.naumen.ru/%s" % repo.name
+            return ret
+            generate_matadata(repo.path,repo.path)
+
+        if 'key' in request.form and request.form['key'] == app.config['REPO_KEY']:
+            need_args = ['repo_name', 'key', 'arch']
+            if len(set(request.form).intersection(need_args)) == len(set(need_args)) and request.files.getlist("file"):
+                link = upload_files(request)
+                return json.dumps({'data': 'ok', 'url': link})
+            else:
+                return json.dumps({'data': 'error', 'msg' : 'need mode args'})
+        form = UploadForm()
+        if form.validate_on_submit():
+            upload_files(request)
+            flash(u'Выполненно успешно!', 'success')
+            return redirect(url_for('upload'))
+        else:
+            flash_errors(form)
+        return render_template('upload.html', form=form)
+
 class RepoView(MethodView):
     def get(self):
     	repos = Repo.query.all()
@@ -72,7 +123,7 @@ class RepoView(MethodView):
         form = RepoForm()
         if form.validate_on_submit():
             db.session()
-            db.session.add(Repo(request.form['name'], request.form['path'], request.form['comment']))
+            db.session.add(Repo(request.form['name'], os.path.join(app.config['BASE_PATH'], request.form['name']), request.form['comment']))
             db.session.commit()
             flash(u'Выполненно успешно!', 'success')
             return redirect(url_for('repo'))
@@ -120,6 +171,7 @@ class SnapshotView(MethodView):
 
 app.add_url_rule('/repo/', view_func=RepoView.as_view('repo'))
 app.add_url_rule('/snapshot/', view_func=SnapshotView.as_view('snapshot'))
+app.add_url_rule('/upload/', view_func=UploadView.as_view('upload'))
 
 
 """
@@ -139,7 +191,12 @@ def sizeof_fmt(num):
 
 def generate_matadata(repo_path, meta_path):
     sys.path.append('/usr/share/createrepo')
+    import genpkgmetadata
+    repo_path = str(repo_path)
+    meta_path = str(meta_path)
     if not os.path.exists(meta_path):
         os.mkdir(meta_path)
-    import genpkgmetadata
+    if not os.path.exists(repo_path):
+        os.mkdir(repo_path)
     genpkgmetadata.main(['--output', meta_path, '-q', repo_path])
+

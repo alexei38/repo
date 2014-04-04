@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<form accept-charset="UTF-8" class="form-horizontal" method="post" name="file_upload" enctype="multipart/form-data">
+{{form.hidden_tag()}}
+  <div class="control-group">
+    <div class="controls">
+      {{ form.file(multiple="") }}
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="controls">
+      {{ form.repo_name() }}
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="controls">
+      {{ form.arch() }}
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="controls">
+      <input type="submit" value="Загрузить" name="upload" class="span2">
+    </div>
+  </div>
+</form>
+{% endblock %}
