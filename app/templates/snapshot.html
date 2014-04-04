@@ -3,10 +3,11 @@
 <a data-toggle="modal" href="#SnapshotModal" class="btn btn-success">Add Snapshot</a>
 <table class="table table-striped">
   <thead>
-    <th>Имя</th>
+    <th width="300px">Имя</th>
     <th>Тип</th>
-    <th>Репозиторий</th>
+    <th width="300px">Репозиторий</th>
     <th>Время создания</th>
+    <th width="20px"></th>
   </thead>
   <tbody>
     {% for snapshot in snapshots %}
@@ -15,6 +16,15 @@
       <td>{{snapshot.type}}</td>
       <td>{{snapshot.repo.name}}</td>
       <td nowrap="nowrap">{{ snapshot.created_on | strftime }}</td>
+      <td>
+        {% if snapshot.type=='test' %}
+        <form accept-charset="UTF-8" method="POST" action="/snapshot/{{snapshot.name}}" name="del_snapshot">
+          <button class="btn btn-danger btn-mini" type="submit">
+            <i class="icon-trash icon-white"></i>
+          </button>
+        </form>
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
   </tbody>
@@ -31,14 +41,14 @@
       {{form.hidden_tag()}}
 
       <div class="control-group">
-        <label class="control-label" for="path">Тип</label>
+        <label class="control-label" for="type">Тип</label>
         <div class="controls">
           {{form.type()}}
         </div>
       </div>
 
       <div class="control-group">
-        <label class="control-label" for="comment">Репозиторий</label>
+        <label class="control-label" for="repo_id">Репозиторий</label>
         <div class="controls">
           {{form.repo_id()}}
         </div>

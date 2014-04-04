@@ -11,20 +11,17 @@ class Config(object):
     BASE_PATH = '/mnt/repo'
     META_PATH = '/mnt/repo/meta'
     SITE_URL = 'http://repo.cc.naumen.ru'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(FLASK_APP_DIR, 'database.db')
     pass
     
 class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(FLASK_APP_DIR, 'production.db')
-
+    
 class TestConfig(Config):
     DEBUG = False
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(FLASK_APP_DIR, 'test.db')
 
 class DevelopmentConfig(Config):
-    '''Use "if app.debug" anywhere in your code, that code will run in development code.'''
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(FLASK_APP_DIR, 'development.db')

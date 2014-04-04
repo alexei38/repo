@@ -3,16 +3,19 @@
 <form accept-charset="UTF-8" class="form-horizontal" method="post" name="file_upload" enctype="multipart/form-data">
 {{form.hidden_tag()}}
   <div class="control-group">
+    <label class="control-label" for="file">Файлы</label>
     <div class="controls">
       {{ form.file(multiple="") }}
     </div>
   </div>
   <div class="control-group">
+    <label class="control-label" for="repo_name">Репозиторий</label>
     <div class="controls">
       {{ form.repo_name() }}
     </div>
   </div>
   <div class="control-group">
+    <label class="control-label" for="arch">Архитектура</label>
     <div class="controls">
       {{ form.arch() }}
     </div>

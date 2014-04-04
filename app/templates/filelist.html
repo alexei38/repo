@@ -8,7 +8,8 @@
   <tbody>
     {% for file, path, type, size in items %}
     <tr>
-      <td><a href="{{ path }}">{{ file }}</a></td>
+      <td>
+      {% if type %}<i class="icon icon-folder-open"></i>{% else %}<i class="icon icon-file"></i>{% endif %} <a href="{{ path }}">{{ file }}</a></td>
       <td>{{ size }}</td>
     </tr>
     {% endfor %}

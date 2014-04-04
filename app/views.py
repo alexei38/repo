@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from forms import RepoForm, SnapshotForm, UploadForm
 from models import Repo, Snapshot
 from operator import itemgetter
-import os, sys, time, json
+import os, sys, time, json, uuid, shutil
 from datetime import datetime
 
 """ Форматируем дату в темплейтах """
@@ -32,7 +32,6 @@ def server_error(error):
 @app.route('/')
 @app.route('/<path:path>')
 def file_list(path=''):
-    print request.path
     base_path = app.config['BASE_PATH']
     full_path = os.path.join(base_path, path)
     if not os.path.isdir(full_path):
@@ -54,7 +53,7 @@ def file_list(path=''):
 
 """ Отдаем repo файлы из снапшота, остальные из репозитория """
 @app.route('/snapshot/<snapshot>/<path:path>')
-def get_snapshot(snapshot,path=''):
+def get_snapshot_file(snapshot,path=''):
     snapshot = Snapshot.query.filter(Snapshot.name == snapshot).first()
     repo_path = os.path.join(snapshot.repo.path, path)
     if path.startswith('repodata'):
@@ -66,12 +65,13 @@ def get_snapshot(snapshot,path=''):
     return send_from_directory(file, folder, as_attachment=True)
 
 """ Загрузка файлов """
-class UploadView(MethodView):
-    def get(self):
+@app.route('/upload/', methods=['GET', 'POST'])
+def upload_view():
+    if request.method == 'GET':
         form = UploadForm()
         return render_template('upload.html', form=form)
 
-    def post(self):
+    if request.method == 'POST':
         def upload_files(request):
             files = request.files.getlist("file")
             repo = Repo.query.filter(Repo.name == request.form['repo_name']).first()
@@ -82,7 +82,6 @@ class UploadView(MethodView):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(folder, filename))
             if 'snapshot' in request.form:
-                import uuid
                 name = str(uuid.uuid4())
                 path = os.path.join(app.config['META_PATH'], name)
                 db.session()
@@ -111,19 +110,20 @@ class UploadView(MethodView):
         if form.validate_on_submit():
             upload_files(request)
             flash(u'Выполненно успешно!', 'success')
-            return redirect(url_for('upload'))
+            return redirect(url_for('upload_view'))
         else:
             flash_errors(form)
         return render_template('upload.html', form=form)
 
 """ Репозитории """
-class RepoView(MethodView):
-    def get(self):
+@app.route('/repo/', methods=['GET', 'POST'])
+def repo_view():
+    if request.method == 'GET':
     	repos = Repo.query.all()
         form = RepoForm()
         return render_template('repo.html', form=form, repos=repos)
 
-    def post(self):
+    if request.method == 'POST':
         repos = Repo.query.all()
         form = RepoForm()
         if form.validate_on_submit():
@@ -131,25 +131,25 @@ class RepoView(MethodView):
             db.session.add(Repo(request.form['name'], os.path.join(app.config['BASE_PATH'], request.form['name']), request.form['comment']))
             db.session.commit()
             flash(u'Выполненно успешно!', 'success')
-            return redirect(url_for('repo'))
+            return redirect(url_for('repo_view'))
         else:
             flash_errors(form)
         return render_template('repo.html', form=form, repos=repos)
 
 """ Снапшоты """
-class SnapshotView(MethodView):
-    def get(self):
+@app.route('/snapshot/', methods=['GET', 'POST'])
+def view_snapshot():
+    if request.method == 'GET':
         snapshots = Snapshot.query.all()
         form = SnapshotForm()
         return render_template('snapshot.html', form=form, snapshots=snapshots)
 
-    def post(self):
+    if request.method == 'POST':
         snapshots = Snapshot.query.all()
         form = SnapshotForm()
         if form.validate_on_submit():
             repo = Repo.query.filter(Repo.id == request.form["repo_id"]).first()
             if request.form['type'] == 'test':
-                import uuid
                 name = str(uuid.uuid4())
                 path = os.path.join(app.config['META_PATH'], name)
             else:
@@ -170,15 +170,26 @@ class SnapshotView(MethodView):
             db.session.commit()
             generate_matadata(repo.path,path)
             flash(u'Выполненно успешно!', 'success')
-            return redirect(url_for('snapshot'))
+            return redirect(url_for('view_snapshot'))
         else:
             flash_errors(form)
         return render_template('snapshot.html', form=form, snapshots=snapshots)
 
-app.add_url_rule('/repo/', view_func=RepoView.as_view('repo'))
-app.add_url_rule('/snapshot/', view_func=SnapshotView.as_view('snapshot'))
-app.add_url_rule('/upload/', view_func=UploadView.as_view('upload'))
-
+""" Удаление снапшотов"""
+@app.route('/snapshot/<name>', methods=['POST'])
+def remove_snapshot(name):
+    if request.method == 'POST':
+        snapshot = Snapshot.query.filter(Snapshot.name == name, Snapshot.type == 'test').first()
+        if snapshot:
+            db.session()
+            db.session.delete(snapshot)
+            db.session.commit()
+            shutil.rmtree(snapshot.path)
+            flash(u'Выполненно успешно', 'success')
+            return redirect(url_for('view_snapshot'))
+        else:
+            flash(u'Snapshot не найден', 'error')
+            return redirect(url_for('view_snapshot'))
 
 """
   Helper functions
