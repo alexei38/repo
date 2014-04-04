@@ -96,8 +96,8 @@ def upload_view():
                 ret = "%s/snapshot/%s" % (app.config['SITE_URL'], snapshot.name)
             else:
                 ret = "%s/%s" % (app.config['SITE_URL'], repo.name)
-            return ret
             generate_matadata(repo.path,repo.path)
+            return ret
 
         if 'key' in request.form and request.form['key'] == app.config['REPO_KEY']:
             need_args = ['repo_name', 'key', 'arch']
@@ -106,14 +106,15 @@ def upload_view():
                 return json.dumps({'data': 'ok', 'url': link})
             else:
                 return json.dumps({'data': 'error', 'msg' : 'need mode args'})
-        form = UploadForm()
-        if form.validate_on_submit():
-            upload_files(request)
-            flash(u'Выполненно успешно!', 'success')
-            return redirect(url_for('upload_view'))
         else:
-            flash_errors(form)
-        return render_template('upload.html', form=form)
+            form = UploadForm()
+            if form.validate_on_submit():
+                upload_files(request)
+                flash(u'Выполненно успешно!', 'success')
+                return redirect(url_for('upload_view'))
+            else:
+                flash_errors(form)
+            return render_template('upload.html', form=form)
 
 """ Репозитории """
 @app.route('/repo/', methods=['GET', 'POST'])

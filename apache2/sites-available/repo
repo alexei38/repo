@@ -1,0 +1,13 @@
+<VirtualHost *>
+    ServerName repo
+
+    WSGIDaemonProcess flask user=voip5.devel group=voip5.devel processes=2 threads=5
+    WSGIScriptAlias / /opt/repo/repo.wsgi
+
+    <Directory /opt/repo/>
+        WSGIProcessGroup flask
+        WSGIApplicationGroup %{GLOBAL}
+        Order deny,allow
+        Allow from all
+    </Directory>
+</VirtualHost>

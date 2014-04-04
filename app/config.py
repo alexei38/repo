@@ -11,7 +11,8 @@ class Config(object):
     BASE_PATH = '/mnt/repo'
     META_PATH = '/mnt/repo/meta'
     SITE_URL = 'http://repo.cc.naumen.ru'
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(FLASK_APP_DIR, 'database.db')
+    #SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(FLASK_APP_DIR, 'database.db')
+    SQLALCHEMY_DATABASE_URI = 'postgresql://repo:repo@127.0.0.1:5432/repo'
     pass
     
 class ProductionConfig(Config):

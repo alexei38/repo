@@ -18,7 +18,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 db = SQLAlchemy(app)
 from app import models
 from sqlalchemy.exc import OperationalError
-try:
-    from app import views
-except OperationalError:
-    pass
+#try:
+from app import views
+#except OperationalError:
+#    pass
