@@ -41,7 +41,7 @@ def generate_matadata(repo_path, meta_path):
     if not os.path.exists(repo_path):
         os.mkdir(repo_path)
     import genpkgmetadata
-    genpkgmetadata.main(['--output', meta_path, '-q', repo_path])
+    genpkgmetadata.main(['-c', 'cache', '--output', meta_path, '-q', repo_path])
 
 if __name__ == "__main__":
     manager.run()
