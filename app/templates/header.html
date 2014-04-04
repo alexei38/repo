@@ -8,9 +8,9 @@
       </button>
       <div class="nav-collapse collapse">
         <ul class="nav">
-          <li class="active"><a href="/">Файлы</a></li>
-          <li><a href="/repo/">Репозитории</a></li>
-          <li><a href="/snapshot/">Снапшоты</a></li>
+          <li {% if not request.path in ["/repo/", "/snapshot/"] %}class="active"{% endif %}><a href="/">Файлы</a></li>
+          <li {% if request.path == "/repo/" %}class="active"{% endif %}><a href="/repo/">Репозитории</a></li>
+          <li {% if request.path == "/snapshot/" %}class="active"{% endif %}><a href="/snapshot/">Снапшоты</a></li>
         </ul>
       </div>
     </div>

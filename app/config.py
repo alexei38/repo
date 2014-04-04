@@ -10,6 +10,7 @@ class Config(object):
     REPO_KEY = 'LsdDFjn234rF78hfuI234SDfe789fhw'
     BASE_PATH = '/mnt/repo'
     META_PATH = '/mnt/repo/meta'
+    SITE_URL = 'http://repo.cc.naumen.ru'
     pass
     
 class ProductionConfig(Config):

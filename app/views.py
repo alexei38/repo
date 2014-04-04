@@ -10,27 +10,29 @@ from operator import itemgetter
 import os, sys, time, json
 from datetime import datetime
 
+""" Форматируем дату в темплейтах """
 @app.template_filter('strftime')
 def _jinja2_filter_datetime(date, fmt=None):
     return date.strftime('%d.%m.%Y %H:%M')
 
-# 404 page not found "route"
+""" 404 page not found "route" """
 @app.errorhandler(404)
 def not_found(error):
     title = "404 Page not found"
     return render_template('404.html', title=title), 404
 
-# 500 server error "route"
+""" 500 server error "route" """
 @app.errorhandler(500)
 def server_error(error):
     title = "500 Server Error"
     db.session.rollback()
     return render_template('500.html', title=title), 500
 
-# Отдаем всем файлы как раньше
+""" Отдаем всем файлы как раньше """
 @app.route('/')
 @app.route('/<path:path>')
 def file_list(path=''):
+    print request.path
     base_path = app.config['BASE_PATH']
     full_path = os.path.join(base_path, path)
     if not os.path.isdir(full_path):
@@ -50,6 +52,7 @@ def file_list(path=''):
 
     return render_template('filelist.html', items=items)
 
+""" Отдаем repo файлы из снапшота, остальные из репозитория """
 @app.route('/snapshot/<snapshot>/<path:path>')
 def get_snapshot(snapshot,path=''):
     snapshot = Snapshot.query.filter(Snapshot.name == snapshot).first()
@@ -62,6 +65,7 @@ def get_snapshot(snapshot,path=''):
     folder = os.path.basename(full_path)
     return send_from_directory(file, folder, as_attachment=True)
 
+""" Загрузка файлов """
 class UploadView(MethodView):
     def get(self):
         form = UploadForm()
@@ -90,9 +94,9 @@ class UploadView(MethodView):
                 db.session.add(snapshot)
                 db.session.commit()
                 generate_matadata(repo.path, path)
-                ret = "http://repo.cc.naumen.ru/snapshot/%s" % snapshot.name
+                ret = "%s/snapshot/%s" % (app.config['SITE_URL'], snapshot.name)
             else:
-                ret = "http://repo.cc.naumen.ru/%s" % repo.name
+                ret = "%s/%s" % (app.config['SITE_URL'], repo.name)
             return ret
             generate_matadata(repo.path,repo.path)
 
@@ -112,6 +116,7 @@ class UploadView(MethodView):
             flash_errors(form)
         return render_template('upload.html', form=form)
 
+""" Репозитории """
 class RepoView(MethodView):
     def get(self):
     	repos = Repo.query.all()
@@ -131,6 +136,7 @@ class RepoView(MethodView):
             flash_errors(form)
         return render_template('repo.html', form=form, repos=repos)
 
+""" Снапшоты """
 class SnapshotView(MethodView):
     def get(self):
         snapshots = Snapshot.query.all()
