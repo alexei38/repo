@@ -41,11 +41,15 @@ def file_list(path=''):
     if path not in ['', '/']:
         parent_path = os.path.normpath(os.path.join('/', path, '..'))
         if parent_path != '.':
-            items.append(('..', parent_path, True, 0))
+            date_modify = os.path.getmtime(full_path)
+            date_modify = datetime.fromtimestamp(date_modify)
+            items.append(('..', parent_path, True, sizeof_fmt(os.path.getsize(full_path)), date_modify))
     for f in os.listdir(full_path):
         real_path = os.path.join(full_path, f)
         link_path = os.path.join('/', path, f)
-        items.append((f, link_path, os.path.isdir(real_path), sizeof_fmt(os.path.getsize(real_path))))
+        date_modify = os.path.getmtime(real_path)
+        date_modify = datetime.fromtimestamp(date_modify)
+        items.append((f, link_path, os.path.isdir(real_path), sizeof_fmt(os.path.getsize(real_path)), date_modify))
         items.sort(key=itemgetter(0))
         items.sort(key=itemgetter(2), reverse=True)
 

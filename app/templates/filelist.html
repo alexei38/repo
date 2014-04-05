@@ -3,13 +3,15 @@
 <table class="table table-striped">
   <thead>
     <th>Путь</th>
+    <th>Дата</th>
     <th>Размер</th>
   </thead>
   <tbody>
-    {% for file, path, type, size in items %}
+    {% for file, path, type, size, date in items %}
     <tr>
       <td>
       {% if type %}<i class="icon icon-folder-open"></i>{% else %}<i class="icon icon-file"></i>{% endif %} <a href="{{ path }}">{{ file }}</a></td>
+      <td>{{ date | strftime }}</td>
       <td>{{ size }}</td>
     </tr>
     {% endfor %}
