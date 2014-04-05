@@ -113,8 +113,10 @@ def upload_view():
         else:
             form = UploadForm()
             if form.validate_on_submit():
-                upload_files(request)
+                link = upload_files(request)
                 flash(u'Выполненно успешно!', 'success')
+                if 'snapshot' in request.form:
+                    flash(u'Создан snapshot %s' % link, 'success')
                 return redirect(url_for('upload_view'))
             else:
                 flash_errors(form)
@@ -132,13 +134,32 @@ def repo_view():
         repos = Repo.query.all()
         form = RepoForm()
         if form.validate_on_submit():
+            repo_path = os.path.join(app.config['BASE_PATH'], request.form['name'])
+            repo = Repo(request.form['name'], repo_path, request.form['comment'])
             db.session()
-            db.session.add(Repo(request.form['name'], os.path.join(app.config['BASE_PATH'], request.form['name']), request.form['comment']))
+            db.session.add(repo)
             db.session.commit()
+            if not os.path.exists(repo_path):
+                os.mkdir(repo_path)
+            if 'snapshot' in request.form:
+                check = Snapshot.query.filter(Snapshot.name == request.form['name'], 
+                                              Snapshot.type == 'master',
+                                              Snapshot.repo_id == repo.id).all()
+                if check:
+                    flash(u'Snapshot уже существует', 'error')
+                else:
+                    snapshot = Snapshot(  name=repo.name,
+                                          type='master',
+                                          path=repo.path,
+                                          repo_id=repo.id
+                                        )
+                    db.session()
+                    db.session.add(snapshot)
+                    db.session.commit()
+                    generate_matadata(repo.path, repo.path)
             flash(u'Выполненно успешно!', 'success')
             return redirect(url_for('repo_view'))
-        else:
-            flash_errors(form)
+        flash_errors(form)
         return render_template('repo.html', form=form, repos=repos)
 
 """ Снапшоты """

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask.ext.wtf import Form
-from wtforms import TextField, BooleanField, TextAreaField, SelectField, validators, ValidationError, FileField, FieldList
+from wtforms import TextField, BooleanField, TextAreaField, SelectField, validators, ValidationError, FileField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from app.models import Repo, Snapshot
 from app import app, db
@@ -19,6 +19,7 @@ class Unique(object):
 class RepoForm(Form):
     name = TextField('name', [validators.Required(), Unique(Repo, Repo.name)])
     comment = TextAreaField('comment')
+    snapshot = BooleanField('snapshot')
 
 class SnapshotForm(Form):
     type = SelectField('type', choices=[('test', 'test'), ('master', 'master')])
@@ -32,3 +33,4 @@ class UploadForm(Form):
                             get_pk=lambda a: a.name,
                             get_label=lambda a: "%s - %s" % (a.name, a.path))
     arch = SelectField('type', choices=[('contrib', 'contrib'), ('i386', 'i386'), ('x86_64', 'x86_64'), ('noarch', 'noarch')])
+    snapshot = BooleanField('snapshot')
