@@ -89,9 +89,11 @@ def upload_view():
                 name = str(uuid.uuid4())
                 path = os.path.join(app.config['META_PATH'], name)
                 db.session()
+                comment = request.form['comment'] if request.form['comment'] else ""
                 snapshot = Snapshot( name=name,
                                      type='test',
                                      path=path,
+                                     comment=comment,
                                      repo_id=repo.id
                                    )
                 db.session.add(snapshot)

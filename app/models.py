@@ -26,12 +26,14 @@ class Snapshot(db.Model):
     name = db.Column(db.String(64), index = True, unique = True)
     path = db.Column(db.String(120), index = True, unique = True)
     type = db.Column(db.String(64), index = False, unique = False)
+    comment = db.Column(db.Text(), index = False, unique = False)
     repo_id = db.Column(db.Integer, db.ForeignKey('repo.id'), nullable=False, index=True)
     created_on = db.Column(db.DateTime(timezone=True), default=datetime.datetime.now)
 
-    def __init__(self, name, type='current', path='', repo_id=repo_id):
+    def __init__(self, name, type='current', path='', comment='', repo_id=repo_id):
         self.name = name
         self.type = type
+        self.comment = comment
         self.path = path
         self.repo_id = repo_id
 
