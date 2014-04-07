@@ -34,7 +34,7 @@ def fixtures():
         repo = Repo(name=repo_name, path=repo_path, comment=repo_name)
         db.session.add(repo)
         db.session.commit()
-        snapshot = Snapshot(name=repo_name, type='master', path=repo_path, comment="text", repo_id=repo.id)
+        snapshot = Snapshot(name=repo_name, type='master', path=repo_path, comment="", repo_id=repo.id)
         db.session.add(snapshot)
         db.session.commit()
         generate_matadata(repo_path, repo_path)
