@@ -19,10 +19,17 @@
       <td nowrap="nowrap">{{ snapshot.created_on | strftime }}</td>
       <td>{{snapshot.comment}}</td>
       <td>
-        {% if snapshot.type=='test' %}
-        <form accept-charset="UTF-8" method="POST" action="/snapshot/{{snapshot.name}}" name="del_snapshot">
+        {% if snapshot.type == 'test' %}
+        <form accept-charset="UTF-8" method="POST" action="/snapshot/remove/{{snapshot.name}}" name="del_snapshot">
           <button class="btn btn-danger btn-mini" type="submit">
             <i class="icon-trash icon-white"></i>
+          </button>
+        </form>
+        {% endif %}
+        {% if snapshot.type == 'master' %}
+        <form accept-charset="UTF-8" method="POST" action="/snapshot/update/{{snapshot.name}}" name="update_snapshot">
+          <button class="btn btn-success btn-mini" id="form_submit" type="submit">
+            <i class="icon-refresh icon-white"></i>
           </button>
         </form>
         {% endif %}

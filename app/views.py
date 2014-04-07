@@ -166,7 +166,7 @@ def repo_view():
 @app.route('/snapshot/', methods=['GET', 'POST'])
 def view_snapshot():
     if request.method == 'GET':
-        snapshots = Snapshot.query.all()
+        snapshots = Snapshot.query.order_by(Snapshot.type, Snapshot.created_on).all()
         form = SnapshotForm()
         return render_template('snapshot.html', form=form, snapshots=snapshots)
 
@@ -204,7 +204,7 @@ def view_snapshot():
         return render_template('snapshot.html', form=form, snapshots=snapshots)
 
 """ Удаление снапшотов"""
-@app.route('/snapshot/<name>', methods=['POST'])
+@app.route('/snapshot/remove/<name>', methods=['POST'])
 def remove_snapshot(name):
     if request.method == 'POST':
         snapshot = Snapshot.query.filter(Snapshot.name == name, Snapshot.type == 'test').first()
@@ -213,6 +213,19 @@ def remove_snapshot(name):
             db.session.delete(snapshot)
             db.session.commit()
             shutil.rmtree(snapshot.path)
+            flash(u'Выполненно успешно', 'success')
+            return redirect(url_for('view_snapshot'))
+        else:
+            flash(u'Snapshot не найден', 'error')
+            return redirect(url_for('view_snapshot'))
+
+""" Обновление снапшотов"""
+@app.route('/snapshot/update/<name>', methods=['POST'])
+def update_snapshot(name):
+    if request.method == 'POST':
+        snapshot = Snapshot.query.filter(Snapshot.name == name, Snapshot.type == 'master').first()
+        if snapshot:
+            generate_matadata(snapshot.repo.path, snapshot.path)
             flash(u'Выполненно успешно', 'success')
             return redirect(url_for('view_snapshot'))
         else:
