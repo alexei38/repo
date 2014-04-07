@@ -23,6 +23,7 @@ class RepoForm(Form):
 
 class SnapshotForm(Form):
     type = SelectField('type', choices=[('test', 'test'), ('master', 'master')])
+    comment = TextAreaField('comment')
     repo_id = QuerySelectField(query_factory=Repo.query.all,
                             get_pk=lambda a: a.id,
                             get_label=lambda a: "%s - %s" % (a.name, a.path))
