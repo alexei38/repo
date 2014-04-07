@@ -7,6 +7,7 @@
     <th>Тип</th>
     <th width="300px">Репозиторий</th>
     <th>Время создания</th>
+    <th>Комментарий</th>
     <th width="20px"></th>
   </thead>
   <tbody>
@@ -16,6 +17,7 @@
       <td>{{snapshot.type}}</td>
       <td>{{snapshot.repo.name}}</td>
       <td nowrap="nowrap">{{ snapshot.created_on | strftime }}</td>
+      <td>{{snapshot.comment}}</td>
       <td>
         {% if snapshot.type=='test' %}
         <form accept-charset="UTF-8" method="POST" action="/snapshot/{{snapshot.name}}" name="del_snapshot">
