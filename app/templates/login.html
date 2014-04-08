@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-signin well">
+  <form method="post">
+    {{form.hidden_tag()}}
+    <h2 class="form-signin-heading">Авторизация</h2>
+    {{form.username(class="input-block-level", placeholder="Login")}}
+    {{form.password(class="input-block-level", placeholder="Password")}}
+    <button class="btn btn-large btn-primary" type="submit">Войти</button>
+  </form>
+ </div>
+{% endblock %}
+
