@@ -8,7 +8,9 @@
     <th width="300px">Репозиторий</th>
     <th>Время создания</th>
     <th>Комментарий</th>
+    {% if user.is_active() %}
     <th width="20px"></th>
+    {% endif %}
   </thead>
   <tbody>
     {% for snapshot in snapshots %}
@@ -18,6 +20,7 @@
       <td>{{snapshot.repo.name}}</td>
       <td nowrap="nowrap">{{ snapshot.created_on | strftime }}</td>
       <td>{{snapshot.comment}}</td>
+      {% if user.is_active() %}
       <td>
         {% if snapshot.type == 'test' %}
         <form accept-charset="UTF-8" method="POST" action="/snapshot/remove/{{snapshot.name}}" name="del_snapshot">
@@ -34,6 +37,7 @@
         </form>
         {% endif %}
       </td>
+      {% endif %}
     </tr>
     {% endfor %}
   </tbody>

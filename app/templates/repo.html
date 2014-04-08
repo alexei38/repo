@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
+{% if user.is_active() %}
 <a data-toggle="modal" href="#RepoModal" class="btn btn-success">Add Repo</a>
+{% endif %}
 <table class="table table-striped">
   <thead>
     <th>Имя</th>
@@ -17,7 +19,7 @@
     {% endfor %}
   </tbody>
 </table>
-
+{% if user.is_active() %}
 <div style="display: none;" id="RepoModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="RepoModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -57,4 +59,5 @@
     {% endif %}
   </div>
 </div>
+{% endif %}
 {% endblock %}

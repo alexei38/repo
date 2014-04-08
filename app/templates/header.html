@@ -8,10 +8,15 @@
       </button>
       <div class="nav-collapse collapse">
         <ul class="nav">
-          <li {% if not request.path in ["/repo/", "/snapshot/", "/upload/"] %}class="active"{% endif %}><a href="/">Файлы</a></li>
+          <li {% if not request.path in ["/repo/", "/snapshot/", "/upload/", "/login/"] %}class="active"{% endif %}><a href="/">Файлы</a></li>
           <li {% if request.path == "/repo/" %}class="active"{% endif %}><a href="/repo/">Репозитории</a></li>
           <li {% if request.path == "/snapshot/" %}class="active"{% endif %}><a href="/snapshot/">Снапшоты</a></li>
-          <li {% if request.path == "/upload/" %}class="active"{% endif %}><a href="/upload/">Загрузить</a></li>
+          {% if user.is_active() %}
+            <li {% if request.path == "/upload/" %}class="active"{% endif %}><a href="/upload/">Загрузить</a></li>
+            <li><a href="/logout">Выйти</a></li>
+          {% else %}
+            <li {% if request.path == "/login/" %}class="active"{% endif %}><a href="/login">Войти</a></li>
+          {% endif %}
         </ul>
       </div>
     </div>

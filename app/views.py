@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from app import app, db
+from app import app, db, User
 from flask.views import MethodView
 from flask import request, render_template, url_for, redirect, flash, send_from_directory
 from werkzeug.utils import secure_filename
-from forms import RepoForm, SnapshotForm, UploadForm
+from forms import RepoForm, SnapshotForm, UploadForm, LoginForm
 from models import Repo, Snapshot
 from operator import itemgetter
 import os, sys, time, json, uuid, shutil
 from datetime import datetime
+from flask.ext.login import login_user, login_required, logout_user, current_user
 
 """ Форматируем дату в темплейтах """
 @app.template_filter('strftime')
@@ -27,6 +28,26 @@ def server_error(error):
     title = "500 Server Error"
     db.session.rollback()
     return render_template('500.html', title=title), 500
+
+""" Авторизация """
+@app.route("/login/", methods=["GET", "POST"])
+def login():
+    form = LoginForm()
+    if request.method == 'POST':
+        user = User(name=form.username.data, passwd=form.password.data)
+        if user.is_active():
+            login_user(user)
+            flash("Logged in successfully.", "success")
+            return redirect(url_for('file_list'))
+        else:
+            flash("Error login", "error")
+    return render_template("login.html", form=form, user=current_user)
+
+@app.route("/logout/", methods=["GET", "POST"])
+def logout():
+    if current_user.is_active():
+        logout_user()
+        return redirect(url_for('login'))
 
 """ Отдаем всем файлы как раньше """
 @app.route('/')
@@ -52,8 +73,7 @@ def file_list(path=''):
         items.append((f, link_path, os.path.isdir(real_path), sizeof_fmt(os.path.getsize(real_path)), date_modify))
         items.sort(key=itemgetter(0))
         items.sort(key=itemgetter(2), reverse=True)
-
-    return render_template('filelist.html', items=items)
+    return render_template('filelist.html', items=items, user=current_user)
 
 """ Отдаем repo файлы из снапшота, остальные из репозитория """
 @app.route('/snapshot/<snapshot>/<path:path>')
@@ -73,7 +93,7 @@ def get_snapshot_file(snapshot,path=''):
 def upload_view():
     if request.method == 'GET':
         form = UploadForm()
-        return render_template('upload.html', form=form)
+        return render_template('upload.html', form=form, user=current_user)
 
     if request.method == 'POST':
         def upload_files(request):
@@ -112,55 +132,61 @@ def upload_view():
                 return json.dumps({'data': 'error', 'msg' : 'need mode args'})
         else:
             form = UploadForm()
-            if form.validate_on_submit():
-                link = upload_files(request)
-                flash(u'Выполненно успешно!', 'success')
-                if 'snapshot' in request.form:
-                    flash(u'Создан snapshot %s' % link, 'success')
-                return redirect(url_for('upload_view'))
+            if current_user.is_active():
+                if form.validate_on_submit():
+                    link = upload_files(request)
+                    flash(u'Выполненно успешно!', 'success')
+                    if 'snapshot' in request.form:
+                        flash(u'Создан snapshot %s' % link, 'success')
+                    return redirect(url_for('upload_view'))
             else:
-                flash_errors(form)
-            return render_template('upload.html', form=form)
+                flash(u'Необходимо авторизоваться', 'error')
+            flash_errors(form)
+            return render_template('upload.html', form=form, user=current_user)
 
 """ Репозитории """
 @app.route('/repo/', methods=['GET', 'POST'])
+@login_required
 def repo_view():
     if request.method == 'GET':
     	repos = Repo.query.all()
         form = RepoForm()
-        return render_template('repo.html', form=form, repos=repos)
+        return render_template('repo.html', form=form, repos=repos, user=current_user)
 
     if request.method == 'POST':
         repos = Repo.query.all()
         form = RepoForm()
-        if form.validate_on_submit():
-            repo_path = os.path.join(app.config['BASE_PATH'], request.form['name'])
-            repo = Repo(request.form['name'], repo_path, request.form['comment'])
-            db.session()
-            db.session.add(repo)
-            db.session.commit()
-            if not os.path.exists(repo_path):
-                os.mkdir(repo_path)
-            if 'snapshot' in request.form:
-                check = Snapshot.query.filter(Snapshot.name == request.form['name'], 
-                                              Snapshot.type == 'master',
-                                              Snapshot.repo_id == repo.id).all()
-                if check:
-                    flash(u'Snapshot уже существует', 'error')
-                else:
-                    snapshot = Snapshot(  name=repo.name,
-                                          type='master',
-                                          path=repo.path,
-                                          repo_id=repo.id
-                                        )
-                    db.session()
-                    db.session.add(snapshot)
-                    db.session.commit()
-                    generate_matadata(repo.path, repo.path)
-            flash(u'Выполненно успешно!', 'success')
-            return redirect(url_for('repo_view'))
+        if current_user.is_active():
+            if form.validate_on_submit():
+                repo_path = os.path.join(app.config['BASE_PATH'], request.form['name'])
+                repo = Repo(request.form['name'], repo_path, request.form['comment'])
+                db.session()
+                db.session.add(repo)
+                db.session.commit()
+                if not os.path.exists(repo_path):
+                    os.mkdir(repo_path)
+                if 'snapshot' in request.form:
+                    check = Snapshot.query.filter(Snapshot.name == request.form['name'], 
+                                                  Snapshot.type == 'master',
+                                                  Snapshot.repo_id == repo.id).all()
+                    if check:
+                        flash(u'Snapshot уже существует', 'error')
+                    else:
+                        snapshot = Snapshot(  name=repo.name,
+                                              type='master',
+                                              path=repo.path,
+                                              repo_id=repo.id
+                                            )
+                        db.session()
+                        db.session.add(snapshot)
+                        db.session.commit()
+                        generate_matadata(repo.path, repo.path)
+                flash(u'Выполненно успешно!', 'success')
+                return redirect(url_for('repo_view'))
+        else:
+            flash(u'Необходимо авторизоваться', 'error')
         flash_errors(form)
-        return render_template('repo.html', form=form, repos=repos)
+        return render_template('repo.html', form=form, repos=repos, user=current_user)
 
 """ Снапшоты """
 @app.route('/snapshot/', methods=['GET', 'POST'])
@@ -168,7 +194,7 @@ def view_snapshot():
     if request.method == 'GET':
         snapshots = Snapshot.query.order_by(Snapshot.type, Snapshot.created_on).all()
         form = SnapshotForm()
-        return render_template('snapshot.html', form=form, snapshots=snapshots)
+        return render_template('snapshot.html', form=form, snapshots=snapshots, user=current_user)
 
     if request.method == 'POST':
         snapshots = Snapshot.query.all()
@@ -185,7 +211,7 @@ def view_snapshot():
                 if check:
                     flash(u'Запись уже существует', 'error')
                     flash_errors(form)
-                    return render_template('snapshot.html', form=form, snapshots=snapshots)
+                    return render_template('snapshot.html', form=form, snapshots=snapshots, user=current_user)
             comment = request.form['comment'] if request.form['comment'] else ""
             db.session()
             db.session.add(Snapshot( name=name,
@@ -199,14 +225,13 @@ def view_snapshot():
             generate_matadata(repo.path,path)
             flash(u'Выполненно успешно!', 'success')
             return redirect(url_for('view_snapshot'))
-        else:
-            flash_errors(form)
-        return render_template('snapshot.html', form=form, snapshots=snapshots)
+        flash_errors(form)
+        return render_template('snapshot.html', form=form, snapshots=snapshots, user=current_user)
 
 """ Удаление снапшотов"""
 @app.route('/snapshot/remove/<name>', methods=['POST'])
 def remove_snapshot(name):
-    if request.method == 'POST':
+    if request.method == 'POST' and current_user.is_active():
         snapshot = Snapshot.query.filter(Snapshot.name == name, Snapshot.type == 'test').first()
         if snapshot:
             db.session()
@@ -214,23 +239,21 @@ def remove_snapshot(name):
             db.session.commit()
             shutil.rmtree(snapshot.path)
             flash(u'Выполненно успешно', 'success')
-            return redirect(url_for('view_snapshot'))
         else:
             flash(u'Snapshot не найден', 'error')
-            return redirect(url_for('view_snapshot'))
+    return redirect(url_for('view_snapshot'))
 
 """ Обновление снапшотов"""
 @app.route('/snapshot/update/<name>', methods=['POST'])
 def update_snapshot(name):
-    if request.method == 'POST':
+    if request.method == 'POST' and current_user.is_active():
         snapshot = Snapshot.query.filter(Snapshot.name == name, Snapshot.type == 'master').first()
         if snapshot:
             generate_matadata(snapshot.repo.path, snapshot.path)
             flash(u'Выполненно успешно', 'success')
-            return redirect(url_for('view_snapshot'))
         else:
             flash(u'Snapshot не найден', 'error')
-            return redirect(url_for('view_snapshot'))
+    return redirect(url_for('view_snapshot'))
 
 """
   Helper functions
@@ -257,4 +280,3 @@ def generate_matadata(repo_path, meta_path):
     if not os.path.exists(repo_path):
         os.mkdir(repo_path)
     genpkgmetadata.main(['-c', 'cache', '--output', meta_path, '-q', repo_path])
-

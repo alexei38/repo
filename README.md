@@ -6,3 +6,5 @@
     pip install Flask-SQLAlchemy
     pip install Flask-WTF
     pip install flask-migrate
+    pip install Flask-login
+    pip install python-ldap

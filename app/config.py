@@ -13,6 +13,9 @@ class Config(object):
     SITE_URL = 'http://repo.cc.naumen.ru'
     #SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(FLASK_APP_DIR, 'database.db')
     SQLALCHEMY_DATABASE_URI = 'postgresql://repo:repo@127.0.0.1:5432/repo'
+
+    LDAP_URI = 'ldap://ldap.naumen.ru/'
+    LDAP_BASE = 'ou=users,dc=naumen,dc=ru'
     pass
     
 class ProductionConfig(Config):
